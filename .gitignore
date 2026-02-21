@@ -1,0 +1,19 @@
+# Binaries
+backend/tmp/
+backend/*.exe
+
+# Environment
+.env
+backend/.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Go
+backend/vendor/
+
+# Editor
+.vscode/
+.idea/
+*.swp
