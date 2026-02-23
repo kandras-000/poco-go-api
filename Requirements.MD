@@ -13,3 +13,11 @@ Create an api with the following:
 
 6. Additional requirement:
    a. Make it so each message shows who the message is from.
+
+
+
+7. Deployment
+
+   Hostname  julius-clinic.bnr.la
+   Primary IP  119.42.52.217
+   sftp://root@119.42.52.217
