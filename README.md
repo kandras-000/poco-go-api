@@ -258,6 +258,114 @@ make generate  # Regenerate sqlc DB layer from SQL files
 
 ---
 
+## Production Deployment
+
+Target: `julius-clinic.bnr.la` (119.42.52.217)
+
+Architecture: nginx (80/443) → Go backend (internal 8080) + PostgreSQL (internal 5432). All services run via Docker Compose.
+
+### Prerequisites on your local machine
+
+- `rsync` and `ssh` available
+- SSH key authorized on the server (see step 1)
+
+### 1. Authorize your SSH key on the server
+
+If starting from scratch with no SSH key:
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
+```
+
+Copy the public key to the server via the VPS web console — paste this output into `/root/.ssh/authorized_keys`:
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+On the server (via web console):
+
+```bash
+mkdir -p /root/.ssh && chmod 700 /root/.ssh
+echo "<paste public key here>" >> /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
+```
+
+### 2. Create the `.env` file on the server
+
+```bash
+ssh root@119.42.52.217 'bash -c "
+mkdir -p /opt/poco
+cat > /opt/poco/.env <<ENVEOF
+POSTGRES_USER=poco
+POSTGRES_PASSWORD=$(openssl rand -hex 16)
+POSTGRES_DB=poco_db
+JWT_SECRET=$(openssl rand -hex 32)
+CORS_ORIGINS=https://julius-clinic.bnr.la
+ENVEOF
+"'
+```
+
+### 3. Install server dependencies
+
+```bash
+ssh root@119.42.52.217 "apt-get install -y rsync certbot"
+```
+
+### 4. Obtain the SSL certificate
+
+Port 80 must be free (no nginx running yet on first deploy):
+
+```bash
+ssh root@119.42.52.217 "certbot certonly --standalone -d julius-clinic.bnr.la --non-interactive --agree-tos --email kandras-000@proton.me"
+```
+
+### 5. Set up the certificate renewal hook
+
+Tells certbot to restart nginx after each auto-renewal:
+
+```bash
+ssh root@119.42.52.217 "
+  cat > /etc/letsencrypt/renewal-hooks/deploy/restart-nginx.sh << 'EOF'
+#!/bin/bash
+docker compose -f /opt/poco/docker-compose.prod.yml restart nginx
+EOF
+  chmod +x /etc/letsencrypt/renewal-hooks/deploy/restart-nginx.sh
+"
+```
+
+### 6. Deploy
+
+```bash
+bash deploy.sh
+```
+
+This rsyncs the project to `/opt/poco` on the server (excluding `.git`, `node_modules`, `dist`, `tmp`, `.env`) and runs `docker compose -f docker-compose.prod.yml up -d --build`.
+
+### Verify
+
+```bash
+# All 3 containers should be running/healthy
+ssh root@119.42.52.217 "docker compose -f /opt/poco/docker-compose.prod.yml ps"
+
+# API should return 400 (not 502)
+curl -s -o /dev/null -w '%{http_code}' -X POST https://julius-clinic.bnr.la/api/auth/register
+```
+
+### Re-deploying after code changes
+
+```bash
+bash deploy.sh
+```
+
+### Certificate info
+
+- Auto-renews via certbot's systemd timer (installed with certbot)
+- Renewal hook at `/etc/letsencrypt/renewal-hooks/deploy/restart-nginx.sh` restarts nginx after renewal
+- To check renewal: `ssh root@119.42.52.217 "certbot renew --dry-run"`
+
+---
+
 ## Regenerating the DB Layer
 
 If you modify any SQL files under `backend/sqlc/`, regenerate the Go code with:
