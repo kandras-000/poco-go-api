@@ -16,10 +16,6 @@ rsync -avz --delete \
   . "${REMOTE_HOST}:${REMOTE_DIR}"
 
 echo "Deploying on remote..."
-ssh "${REMOTE_HOST}" bash -c "
-  set -euo pipefail
-  cd ${REMOTE_DIR}
-  docker compose -f docker-compose.prod.yml up -d --build
-"
+ssh "${REMOTE_HOST}" "cd ${REMOTE_DIR} && docker compose -f docker-compose.prod.yml up -d --build"
 
 echo "Deploy complete."
