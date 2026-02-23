@@ -358,6 +358,42 @@ curl -s -o /dev/null -w '%{http_code}' -X POST https://julius-clinic.bnr.la/api/
 bash deploy.sh
 ```
 
+### Connecting to the production database via pgAdmin
+
+The postgres container is bound to `127.0.0.1:5432` on the server — not publicly reachable. Connect via pgAdmin's built-in SSH tunnel.
+
+**In pgAdmin, create a new server:**
+
+1. Right-click **Servers** → **Register** → **Server**
+2. **General** tab → Name: `poco-prod`
+3. **Connection** tab:
+
+| Field | Value |
+|---|---|
+| Host | `127.0.0.1` |
+| Port | `5432` |
+| Database | `poco_db` |
+| Username | `poco` |
+| Password | *(value of `POSTGRES_PASSWORD` in `/opt/poco/.env` on the server)* |
+
+4. **SSH Tunnel** tab:
+
+| Field | Value |
+|---|---|
+| Use SSH tunneling | Yes |
+| Tunnel host | `119.42.52.217` |
+| Tunnel port | `22` |
+| Username | `root` |
+| Authentication | Identity file |
+| Identity file | `~/.ssh/id_ed25519` |
+
+5. Click **Save**
+
+To look up the password at any time:
+```bash
+ssh root@119.42.52.217 "grep POSTGRES_PASSWORD /opt/poco/.env"
+```
+
 ### Certificate info
 
 - Auto-renews via certbot's systemd timer (installed with certbot)
