@@ -25,7 +25,6 @@
         <p class="text-gray-400 text-sm mt-1">Images, video, audio, PDF, Word documents</p>
       </div>
       <div v-else class="flex flex-col items-center gap-3">
-        <!-- Preview -->
         <img
           v-if="previewUrl && selectedFile.type.startsWith('image/')"
           :src="previewUrl"
@@ -38,16 +37,10 @@
           class="max-h-40 rounded-lg"
           controls
         />
-        <div v-else class="text-5xl">
-          {{ fileIcon(selectedFile.type) }}
-        </div>
+        <div v-else class="text-5xl">{{ fileIcon(selectedFile.type) }}</div>
         <div class="text-sm text-gray-700 font-medium">{{ selectedFile.name }}</div>
         <div class="text-xs text-gray-400">{{ formatSize(selectedFile.size) }}</div>
-        <button
-          type="button"
-          class="text-xs text-indigo-600 hover:underline"
-          @click.stop="clearFile"
-        >
+        <button type="button" class="text-xs text-indigo-600 hover:underline" @click.stop="clearFile">
           Change file
         </button>
       </div>
@@ -86,10 +79,8 @@
       <span v-if="locationStatus" class="text-xs text-gray-500">{{ locationStatus }}</span>
     </div>
 
-    <!-- Error -->
     <p v-if="uploadError" class="mt-3 text-sm text-red-500">{{ uploadError }}</p>
 
-    <!-- Upload button -->
     <button
       type="button"
       :disabled="!selectedFile || uploading"
@@ -106,6 +97,7 @@
 import { ref } from 'vue'
 import { useEvidenceStore } from '../stores/evidence'
 
+const props = defineProps<{ containerId: string }>()
 const emit = defineEmits<{ uploaded: [] }>()
 
 const evidenceStore = useEvidenceStore()
@@ -136,11 +128,9 @@ function setFile(file: File) {
   selectedFile.value = file
   uploadError.value = ''
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
-  if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-    previewUrl.value = URL.createObjectURL(file)
-  } else {
-    previewUrl.value = null
-  }
+  previewUrl.value = (file.type.startsWith('image/') || file.type.startsWith('video/'))
+    ? URL.createObjectURL(file)
+    : null
 }
 
 function clearFile() {
@@ -194,6 +184,7 @@ async function handleUpload() {
   try {
     const fd = new FormData()
     fd.append('file', selectedFile.value)
+    fd.append('container_id', props.containerId)
     fd.append('description', description.value)
     if (latitude.value !== null) fd.append('latitude', String(latitude.value))
     if (longitude.value !== null) fd.append('longitude', String(longitude.value))

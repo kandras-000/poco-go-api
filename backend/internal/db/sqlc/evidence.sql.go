@@ -13,13 +13,14 @@ import (
 )
 
 const createEvidence = `-- name: CreateEvidence :one
-INSERT INTO evidence (user_id, filename, original_name, mime_type, file_size, description, latitude, longitude)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, user_id, filename, original_name, mime_type, file_size, description, latitude, longitude, created_at
+INSERT INTO evidence (user_id, container_id, filename, original_name, mime_type, file_size, description, latitude, longitude)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, user_id, container_id, filename, original_name, mime_type, file_size, description, latitude, longitude, created_at
 `
 
 type CreateEvidenceParams struct {
 	UserID       uuid.UUID     `json:"user_id"`
+	ContainerID  pgtype.UUID   `json:"container_id"`
 	Filename     string        `json:"filename"`
 	OriginalName string        `json:"original_name"`
 	MimeType     string        `json:"mime_type"`
@@ -32,6 +33,7 @@ type CreateEvidenceParams struct {
 func (q *Queries) CreateEvidence(ctx context.Context, arg CreateEvidenceParams) (Evidence, error) {
 	row := q.db.QueryRow(ctx, createEvidence,
 		arg.UserID,
+		arg.ContainerID,
 		arg.Filename,
 		arg.OriginalName,
 		arg.MimeType,
@@ -44,6 +46,7 @@ func (q *Queries) CreateEvidence(ctx context.Context, arg CreateEvidenceParams) 
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.ContainerID,
 		&i.Filename,
 		&i.OriginalName,
 		&i.MimeType,
@@ -72,7 +75,7 @@ func (q *Queries) DeleteEvidence(ctx context.Context, arg DeleteEvidenceParams) 
 }
 
 const getEvidenceByID = `-- name: GetEvidenceByID :one
-SELECT id, user_id, filename, original_name, mime_type, file_size, description, latitude, longitude, created_at FROM evidence
+SELECT id, user_id, container_id, filename, original_name, mime_type, file_size, description, latitude, longitude, created_at FROM evidence
 WHERE id = $1
 `
 
@@ -82,6 +85,7 @@ func (q *Queries) GetEvidenceByID(ctx context.Context, id uuid.UUID) (Evidence, 
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.ContainerID,
 		&i.Filename,
 		&i.OriginalName,
 		&i.MimeType,
@@ -94,14 +98,14 @@ func (q *Queries) GetEvidenceByID(ctx context.Context, id uuid.UUID) (Evidence, 
 	return i, err
 }
 
-const listEvidenceByUser = `-- name: ListEvidenceByUser :many
-SELECT id, user_id, filename, original_name, mime_type, file_size, description, latitude, longitude, created_at FROM evidence
-WHERE user_id = $1
+const listEvidenceByContainer = `-- name: ListEvidenceByContainer :many
+SELECT id, user_id, container_id, filename, original_name, mime_type, file_size, description, latitude, longitude, created_at FROM evidence
+WHERE container_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListEvidenceByUser(ctx context.Context, userID uuid.UUID) ([]Evidence, error) {
-	rows, err := q.db.Query(ctx, listEvidenceByUser, userID)
+func (q *Queries) ListEvidenceByContainer(ctx context.Context, containerID pgtype.UUID) ([]Evidence, error) {
+	rows, err := q.db.Query(ctx, listEvidenceByContainer, containerID)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +116,7 @@ func (q *Queries) ListEvidenceByUser(ctx context.Context, userID uuid.UUID) ([]E
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.ContainerID,
 			&i.Filename,
 			&i.OriginalName,
 			&i.MimeType,

@@ -8,19 +8,24 @@ import (
 	"context"
 
 	uuid "github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	CreateContainer(ctx context.Context, arg CreateContainerParams) (EvidenceContainer, error)
 	CreateEvidence(ctx context.Context, arg CreateEvidenceParams) (Evidence, error)
 	CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteContainer(ctx context.Context, arg DeleteContainerParams) error
 	DeleteEvidence(ctx context.Context, arg DeleteEvidenceParams) error
+	GetContainerByID(ctx context.Context, id uuid.UUID) (EvidenceContainer, error)
 	GetEvidenceByID(ctx context.Context, id uuid.UUID) (Evidence, error)
 	GetMessagesBetweenUsers(ctx context.Context, arg GetMessagesBetweenUsersParams) ([]GetMessagesBetweenUsersRow, error)
 	GetUndeliveredMessages(ctx context.Context, recipientID uuid.UUID) ([]GetUndeliveredMessagesRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
-	ListEvidenceByUser(ctx context.Context, userID uuid.UUID) ([]Evidence, error)
+	ListContainersByUser(ctx context.Context, userID uuid.UUID) ([]EvidenceContainer, error)
+	ListEvidenceByContainer(ctx context.Context, containerID pgtype.UUID) ([]Evidence, error)
 	ListUsers(ctx context.Context) ([]ListUsersRow, error)
 	MarkAllMessagesDelivered(ctx context.Context, recipientID uuid.UUID) error
 	MarkMessageDelivered(ctx context.Context, id uuid.UUID) error

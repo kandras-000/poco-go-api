@@ -25,9 +25,17 @@ export interface AuthResponse {
   user: User
 }
 
+export interface EvidenceContainer {
+  id: string
+  user_id: string
+  name: string
+  created_at: string
+}
+
 export interface Evidence {
   id: string
   user_id: string
+  container_id: string | null
   filename: string
   original_name: string
   mime_type: string

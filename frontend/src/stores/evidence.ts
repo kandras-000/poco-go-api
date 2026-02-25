@@ -8,11 +8,11 @@ export const useEvidenceStore = defineStore('evidence', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchEvidence() {
+  async function fetchByContainer(containerId: string) {
     loading.value = true
     error.value = null
     try {
-      const response = await api.get<Evidence[]>('/evidence')
+      const response = await api.get<Evidence[]>(`/containers/${containerId}/evidence`)
       items.value = response.data
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: string } } }
@@ -35,5 +35,10 @@ export const useEvidenceStore = defineStore('evidence', () => {
     items.value = items.value.filter((e) => e.id !== id)
   }
 
-  return { items, loading, error, fetchEvidence, uploadEvidence, deleteEvidence }
+  function clear() {
+    items.value = []
+    error.value = null
+  }
+
+  return { items, loading, error, fetchByContainer, uploadEvidence, deleteEvidence, clear }
 })

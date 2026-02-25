@@ -14,6 +14,7 @@ import (
 type Evidence struct {
 	ID           uuid.UUID     `json:"id"`
 	UserID       uuid.UUID     `json:"user_id"`
+	ContainerID  pgtype.UUID   `json:"container_id"`
 	Filename     string        `json:"filename"`
 	OriginalName string        `json:"original_name"`
 	MimeType     string        `json:"mime_type"`
@@ -22,6 +23,13 @@ type Evidence struct {
 	Latitude     pgtype.Float8 `json:"latitude"`
 	Longitude    pgtype.Float8 `json:"longitude"`
 	CreatedAt    time.Time     `json:"created_at"`
+}
+
+type EvidenceContainer struct {
+	ID        uuid.UUID `json:"id"`
+	UserID    uuid.UUID `json:"user_id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Message struct {

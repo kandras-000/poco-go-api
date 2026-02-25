@@ -33,6 +33,12 @@ Create an api with the following:
    * Captures geolocation.
    * Make the feature and the entire app mobile friendly and reponsive.
    * Can easily upload a photo, audio, video etc that is taken from a phone.
-   * Add a description for the evidence being uploaded. 
+   * Add a description for the evidence being uploaded.
+
+   c. More details for this feature:
+   * Add a text field to enter a name for the container for the evidence, include a timestamp when container is created.
+   * This container will be the parent database table under which evidence will be stored a one to many relationship.
+   * Add the ability to select an existing container to upload evidence to or create a new container.
+   * Make the Home page of the App display a list of existing containers which you can select to add more evidence to, order this by the most recently created ones first.
 
    

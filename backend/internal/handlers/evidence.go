@@ -53,6 +53,17 @@ func (h *EvidenceHandler) Upload(c *gin.Context) {
 		return
 	}
 
+	containerIDStr := c.PostForm("container_id")
+	if containerIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "container_id is required"})
+		return
+	}
+	containerUUID, err := uuid.Parse(containerIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid container_id"})
+		return
+	}
+
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
@@ -60,7 +71,6 @@ func (h *EvidenceHandler) Upload(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Detect MIME type from first 512 bytes
 	buf := make([]byte, 512)
 	n, _ := file.Read(buf)
 	detectedMIME := http.DetectContentType(buf[:n])
@@ -68,7 +78,6 @@ func (h *EvidenceHandler) Upload(c *gin.Context) {
 		seeker.Seek(0, io.SeekStart)
 	}
 
-	// Trust content-type header for formats sniffing misses
 	headerMIME := header.Header.Get("Content-Type")
 	mimeType := detectedMIME
 	if headerMIME != "" && isMIMEAllowed(headerMIME) {
@@ -98,6 +107,13 @@ func (h *EvidenceHandler) Upload(c *gin.Context) {
 		return
 	}
 
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		os.Remove(destPath)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user id"})
+		return
+	}
+
 	descStr := c.PostForm("description")
 	description := pgtype.Text{String: descStr, Valid: descStr != ""}
 
@@ -115,15 +131,9 @@ func (h *EvidenceHandler) Upload(c *gin.Context) {
 		}
 	}
 
-	userUUID, err := uuid.Parse(userID)
-	if err != nil {
-		os.Remove(destPath)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user id"})
-		return
-	}
-
-	params := sqlcdb.CreateEvidenceParams{
+	evidence, err := h.queries.CreateEvidence(c.Request.Context(), sqlcdb.CreateEvidenceParams{
 		UserID:       userUUID,
+		ContainerID:  pgtype.UUID{Bytes: [16]byte(containerUUID), Valid: true},
 		Filename:     newFilename,
 		OriginalName: header.Filename,
 		MimeType:     mimeType,
@@ -131,9 +141,7 @@ func (h *EvidenceHandler) Upload(c *gin.Context) {
 		Description:  description,
 		Latitude:     latitude,
 		Longitude:    longitude,
-	}
-
-	evidence, err := h.queries.CreateEvidence(c.Request.Context(), params)
+	})
 	if err != nil {
 		os.Remove(destPath)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save evidence record"})
@@ -141,28 +149,6 @@ func (h *EvidenceHandler) Upload(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, evidence)
-}
-
-func (h *EvidenceHandler) List(c *gin.Context) {
-	userID := c.GetString("userID")
-
-	userUUID, err := uuid.Parse(userID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user id"})
-		return
-	}
-
-	items, err := h.queries.ListEvidenceByUser(c.Request.Context(), userUUID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch evidence"})
-		return
-	}
-
-	if items == nil {
-		items = []sqlcdb.Evidence{}
-	}
-
-	c.JSON(http.StatusOK, items)
 }
 
 func (h *EvidenceHandler) Delete(c *gin.Context) {

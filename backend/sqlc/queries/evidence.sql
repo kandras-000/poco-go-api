@@ -1,11 +1,11 @@
 -- name: CreateEvidence :one
-INSERT INTO evidence (user_id, filename, original_name, mime_type, file_size, description, latitude, longitude)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO evidence (user_id, container_id, filename, original_name, mime_type, file_size, description, latitude, longitude)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING *;
 
--- name: ListEvidenceByUser :many
+-- name: ListEvidenceByContainer :many
 SELECT * FROM evidence
-WHERE user_id = $1
+WHERE container_id = $1
 ORDER BY created_at DESC;
 
 -- name: GetEvidenceByID :one

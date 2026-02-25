@@ -50,6 +50,7 @@ func main() {
 	msgHandler := handlers.NewMessageHandler(queries, hub)
 	wsHandler := handlers.NewWSHandler(hub, queries, cfg.JWTSecret)
 	evidenceHandler := handlers.NewEvidenceHandler(queries, cfg.UploadDir)
+	containerHandler := handlers.NewContainerHandler(queries)
 
 	r := gin.Default()
 
@@ -75,8 +76,11 @@ func main() {
 			protected.POST("/messages", msgHandler.SendMessage)
 			protected.GET("/messages/:userId", msgHandler.GetMessages)
 			protected.POST("/evidence", evidenceHandler.Upload)
-			protected.GET("/evidence", evidenceHandler.List)
 			protected.DELETE("/evidence/:id", evidenceHandler.Delete)
+			protected.POST("/containers", containerHandler.Create)
+			protected.GET("/containers", containerHandler.List)
+			protected.DELETE("/containers/:id", containerHandler.Delete)
+			protected.GET("/containers/:id/evidence", containerHandler.ListEvidence)
 		}
 	}
 
