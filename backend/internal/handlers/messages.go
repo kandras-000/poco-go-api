@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -10,6 +11,17 @@ import (
 	sqlcdb "poco/internal/db/sqlc"
 	"poco/internal/ws"
 )
+
+// MessageResponse is the JSON shape for messages sent to clients.
+type MessageResponse struct {
+	ID             uuid.UUID `json:"id"`
+	SenderID       uuid.UUID `json:"sender_id"`
+	SenderUsername string    `json:"sender_username"`
+	RecipientID    uuid.UUID `json:"recipient_id"`
+	Content        string    `json:"content"`
+	Delivered      bool      `json:"delivered"`
+	CreatedAt      time.Time `json:"created_at"`
+}
 
 type MessageHandler struct {
 	queries *sqlcdb.Queries
@@ -59,23 +71,22 @@ func (h *MessageHandler) SendMessage(c *gin.Context) {
 		return
 	}
 
-	// Attach sender_username (from JWT — no extra DB query needed)
-	msgWithSender := sqlcdb.MessageWithSender{
+	resp := MessageResponse{
 		ID:             msg.ID,
 		SenderID:       msg.SenderID,
+		SenderUsername: senderUsername,
 		RecipientID:    msg.RecipientID,
 		Content:        msg.Content,
 		Delivered:      msg.Delivered,
 		CreatedAt:      msg.CreatedAt,
-		SenderUsername: senderUsername,
 	}
 
 	if online {
-		payload, _ := json.Marshal(ws.WSMessage{Type: "message", Data: msgWithSender})
+		payload, _ := json.Marshal(ws.WSMessage{Type: "message", Data: resp})
 		h.hub.SendToUser(req.RecipientID, payload)
 	}
 
-	c.JSON(http.StatusCreated, msgWithSender)
+	c.JSON(http.StatusCreated, resp)
 }
 
 func (h *MessageHandler) GetMessages(c *gin.Context) {
@@ -101,8 +112,19 @@ func (h *MessageHandler) GetMessages(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get messages"})
 		return
 	}
-	if msgs == nil {
-		msgs = []sqlcdb.MessageWithSender{}
+
+	result := make([]MessageResponse, 0, len(msgs))
+	for _, m := range msgs {
+		result = append(result, MessageResponse{
+			ID:             m.ID,
+			SenderID:       m.SenderID,
+			SenderUsername: m.SenderUsername,
+			RecipientID:    m.RecipientID,
+			Content:        m.Content,
+			Delivered:      m.Delivered,
+			CreatedAt:      m.CreatedAt,
+		})
 	}
-	c.JSON(http.StatusOK, msgs)
+
+	c.JSON(http.StatusOK, result)
 }

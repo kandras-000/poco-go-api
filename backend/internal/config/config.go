@@ -10,6 +10,7 @@ type Config struct {
 	JWTSecret   string
 	Port        string
 	CORSOrigins []string
+	UploadDir   string
 }
 
 func Load() Config {
@@ -18,6 +19,7 @@ func Load() Config {
 		JWTSecret:   getEnv("JWT_SECRET", "change-me-in-production"),
 		Port:        getEnv("PORT", "8080"),
 		CORSOrigins: strings.Split(getEnv("CORS_ORIGINS", "http://localhost:5173"), ","),
+		UploadDir:   getEnv("UPLOAD_DIR", "./uploads"),
 	}
 }
 

@@ -16,3 +16,7 @@ sql:
               import: "github.com/google/uuid"
               package: "uuid"
               type: "UUID"
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "pg_catalog.timestamptz"
+            go_type: "time.Time"

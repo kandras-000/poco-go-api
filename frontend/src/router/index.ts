@@ -3,6 +3,7 @@ import { useAuthStore } from '../stores/auth'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import ChatView from '../views/ChatView.vue'
+import EvidenceView from '../views/EvidenceView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -10,7 +11,8 @@ const router = createRouter({
     { path: '/', redirect: '/chat' },
     { path: '/login',    name: 'login',    component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
-    { path: '/chat',     name: 'chat',     component: ChatView, meta: { requiresAuth: true } },
+    { path: '/chat',     name: 'chat',     component: ChatView,     meta: { requiresAuth: true } },
+    { path: '/evidence', name: 'evidence', component: EvidenceView, meta: { requiresAuth: true } },
   ],
 })
 

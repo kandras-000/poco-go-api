@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -35,6 +36,10 @@ func main() {
 	}
 	log.Println("migrations applied")
 
+	if err := os.MkdirAll(cfg.UploadDir, 0755); err != nil {
+		log.Fatalf("failed to create upload dir: %v", err)
+	}
+
 	queries := sqlcdb.New(pool)
 
 	hub := ws.NewHub()
@@ -44,6 +49,7 @@ func main() {
 	userHandler := handlers.NewUserHandler(queries)
 	msgHandler := handlers.NewMessageHandler(queries, hub)
 	wsHandler := handlers.NewWSHandler(hub, queries, cfg.JWTSecret)
+	evidenceHandler := handlers.NewEvidenceHandler(queries, cfg.UploadDir)
 
 	r := gin.Default()
 
@@ -68,8 +74,13 @@ func main() {
 			protected.GET("/users", userHandler.ListUsers)
 			protected.POST("/messages", msgHandler.SendMessage)
 			protected.GET("/messages/:userId", msgHandler.GetMessages)
+			protected.POST("/evidence", evidenceHandler.Upload)
+			protected.GET("/evidence", evidenceHandler.List)
+			protected.DELETE("/evidence/:id", evidenceHandler.Delete)
 		}
 	}
+
+	r.Static("/api/uploads", cfg.UploadDir)
 
 	// WebSocket endpoint — auth via ?token= query param
 	r.GET("/ws", wsHandler.HandleWS)

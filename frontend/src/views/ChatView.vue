@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-view">
+  <div class="flex-1 flex overflow-hidden">
     <UserList
       :users="chat.users"
       :selectedUser="chat.selectedUser"
@@ -7,11 +7,13 @@
       @select="handleSelectUser"
     />
 
-    <div class="chat-main">
+    <div class="flex-1 flex flex-col overflow-hidden">
       <template v-if="chat.selectedUser">
-        <div class="chat-header">
-          <div class="avatar">{{ chat.selectedUser.username[0].toUpperCase() }}</div>
-          <span class="chat-with">{{ chat.selectedUser.username }}</span>
+        <div class="flex items-center gap-3 px-5 py-3.5 bg-white border-b border-gray-200">
+          <div class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+            {{ chat.selectedUser.username[0].toUpperCase() }}
+          </div>
+          <span class="font-semibold text-gray-900">{{ chat.selectedUser.username }}</span>
         </div>
         <MessageList
           :messages="currentMessages"
@@ -20,10 +22,8 @@
         <MessageInput @send="handleSend" />
       </template>
 
-      <div v-else class="no-selection">
-        <div class="hint">
-          <p>Select a user from the left to start chatting.</p>
-        </div>
+      <div v-else class="flex-1 flex items-center justify-center">
+        <p class="text-gray-400 text-base">Select a user from the left to start chatting.</p>
       </div>
     </div>
   </div>
@@ -46,7 +46,6 @@ const currentMessages = computed(() =>
   chat.selectedUser ? (chat.messages[chat.selectedUser.id] ?? []) : [],
 )
 
-
 async function handleSelectUser(user: User) {
   chat.selectUser(user)
   await chat.fetchMessages(user.id)
@@ -67,59 +66,3 @@ onUnmounted(() => {
   chat.disconnectWebSocket()
 })
 </script>
-
-<style scoped>
-.chat-view {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
-
-.chat-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.chat-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1.25rem;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #4f46e5;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.95rem;
-  flex-shrink: 0;
-}
-
-.chat-with {
-  font-weight: 600;
-  font-size: 1rem;
-  color: #111827;
-}
-
-.no-selection {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hint p {
-  color: #9ca3af;
-  font-size: 1rem;
-}
-</style>

@@ -24,3 +24,16 @@ export interface AuthResponse {
   token: string
   user: User
 }
+
+export interface Evidence {
+  id: string
+  user_id: string
+  filename: string
+  original_name: string
+  mime_type: string
+  file_size: number
+  description: string | null
+  latitude: number | null
+  longitude: number | null
+  created_at: string
+}

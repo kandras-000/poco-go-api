@@ -21,3 +21,18 @@ Create an api with the following:
    Hostname  julius-clinic.bnr.la
    Primary IP  119.42.52.217
    sftp://root@119.42.52.217
+
+8. New features:
+   a. Using the existing tech stack.
+   a. Make the app a Progressive Web App "PWA" and handle prompting the user to update when a new version is detected.
+
+   b. Add the following feature for a logged in user:
+
+   * This feature is to upload evidence.
+   * File upload feature with nice UX using tailwind, can upload photos, files, videos, audio.
+   * Captures geolocation.
+   * Make the feature and the entire app mobile friendly and reponsive.
+   * Can easily upload a photo, audio, video etc that is taken from a phone.
+   * Add a description for the evidence being uploaded. 
+
+   
