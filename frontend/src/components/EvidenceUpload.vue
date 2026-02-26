@@ -164,7 +164,11 @@ async function toggleLocation() {
   locationStatus.value = 'Getting location…'
   try {
     const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 }),
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 60000,
+      }),
     )
     latitude.value = pos.coords.latitude
     longitude.value = pos.coords.longitude
