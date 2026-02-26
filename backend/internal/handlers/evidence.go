@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -160,23 +159,15 @@ func (h *EvidenceHandler) Upload(c *gin.Context) {
 	descStr := c.PostForm("description")
 	description := pgtype.Text{String: descStr, Valid: descStr != ""}
 
-	latStr := c.PostForm("latitude")
-	lonStr := c.PostForm("longitude")
-	log.Printf("Upload: lat=%q lon=%q", latStr, lonStr)
-
 	var latitude, longitude pgtype.Float8
-	if latStr != "" {
+	if latStr := c.PostForm("latitude"); latStr != "" {
 		if v, err := strconv.ParseFloat(latStr, 64); err == nil {
 			latitude = pgtype.Float8{Float64: v, Valid: true}
-		} else {
-			log.Printf("Upload: failed to parse latitude %q: %v", latStr, err)
 		}
 	}
-	if lonStr != "" {
+	if lonStr := c.PostForm("longitude"); lonStr != "" {
 		if v, err := strconv.ParseFloat(lonStr, 64); err == nil {
 			longitude = pgtype.Float8{Float64: v, Valid: true}
-		} else {
-			log.Printf("Upload: failed to parse longitude %q: %v", lonStr, err)
 		}
 	}
 
