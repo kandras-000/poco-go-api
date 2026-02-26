@@ -66,9 +66,10 @@ func RunMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 		created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	);
 	CREATE INDEX IF NOT EXISTS idx_evidence_user_id ON evidence(user_id);
-	CREATE INDEX IF NOT EXISTS idx_evidence_container_id ON evidence(container_id);
 
 	ALTER TABLE evidence ADD COLUMN IF NOT EXISTS container_id UUID REFERENCES evidence_containers(id) ON DELETE CASCADE;
+
+	CREATE INDEX IF NOT EXISTS idx_evidence_container_id ON evidence(container_id);
 	`
 
 	_, err := pool.Exec(ctx, schema)
