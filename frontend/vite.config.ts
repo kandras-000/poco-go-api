@@ -13,7 +13,7 @@ export default defineConfig({
       manifest: {
         name: 'Poco Chat',
         short_name: 'Poco',
-        description: 'Secure messaging and evidence collection',
+        description: 'Secure messaging and evidence collection app',
         theme_color: '#4f46e5',
         background_color: '#f0f2f5',
         display: 'standalone',
