@@ -144,9 +144,10 @@ func (h *ContainerHandler) ListEvidence(c *gin.Context) {
 		return
 	}
 
-	if items == nil {
-		items = []sqlcdb.Evidence{}
+	responses := make([]EvidenceResponse, len(items))
+	for i, item := range items {
+		responses[i] = toEvidenceResponse(item)
 	}
 
-	c.JSON(http.StatusOK, items)
+	c.JSON(http.StatusOK, responses)
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -14,6 +15,46 @@ import (
 
 	sqlcdb "poco/internal/db/sqlc"
 )
+
+type EvidenceResponse struct {
+	ID           uuid.UUID  `json:"id"`
+	UserID       uuid.UUID  `json:"user_id"`
+	ContainerID  *string    `json:"container_id"`
+	Filename     string     `json:"filename"`
+	OriginalName string     `json:"original_name"`
+	MimeType     string     `json:"mime_type"`
+	FileSize     int64      `json:"file_size"`
+	Description  *string    `json:"description"`
+	Latitude     *float64   `json:"latitude"`
+	Longitude    *float64   `json:"longitude"`
+	CreatedAt    time.Time  `json:"created_at"`
+}
+
+func toEvidenceResponse(e sqlcdb.Evidence) EvidenceResponse {
+	r := EvidenceResponse{
+		ID:           e.ID,
+		UserID:       e.UserID,
+		Filename:     e.Filename,
+		OriginalName: e.OriginalName,
+		MimeType:     e.MimeType,
+		FileSize:     e.FileSize,
+		CreatedAt:    e.CreatedAt,
+	}
+	if e.ContainerID.Valid {
+		s := uuid.UUID(e.ContainerID.Bytes).String()
+		r.ContainerID = &s
+	}
+	if e.Description.Valid {
+		r.Description = &e.Description.String
+	}
+	if e.Latitude.Valid {
+		r.Latitude = &e.Latitude.Float64
+	}
+	if e.Longitude.Valid {
+		r.Longitude = &e.Longitude.Float64
+	}
+	return r
+}
 
 var allowedMIMEPrefixes = []string{
 	"image/",
@@ -148,7 +189,7 @@ func (h *EvidenceHandler) Upload(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, evidence)
+	c.JSON(http.StatusCreated, toEvidenceResponse(evidence))
 }
 
 func (h *EvidenceHandler) Delete(c *gin.Context) {

@@ -26,12 +26,16 @@
       </p>
       <div class="flex items-center gap-2 mt-1 flex-wrap">
         <span class="text-xs text-gray-400">{{ formatDate(item.created_at) }}</span>
-        <span
+        <a
           v-if="item.latitude !== null && item.longitude !== null"
-          class="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full"
+          :href="`https://www.google.com/maps?q=${item.latitude},${item.longitude}`"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full hover:bg-green-200 transition-colors"
+          @click.stop
         >
-          📍 Location
-        </span>
+          📍 {{ item.latitude!.toFixed(5) }}, {{ item.longitude!.toFixed(5) }}
+        </a>
       </div>
     </div>
 
