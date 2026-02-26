@@ -173,11 +173,14 @@ async function toggleLocation() {
     latitude.value = pos.coords.latitude
     longitude.value = pos.coords.longitude
     locationStatus.value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`
-  } catch {
+  } catch (e: unknown) {
     useLocation.value = false
     latitude.value = null
     longitude.value = null
-    locationStatus.value = 'Location unavailable'
+    const geo = e as GeolocationPositionError
+    if (geo?.code === 1) locationStatus.value = 'Permission denied'
+    else if (geo?.code === 3) locationStatus.value = 'Timed out — try again outdoors'
+    else locationStatus.value = `Unavailable (code ${geo?.code ?? '?'})`
   }
 }
 
