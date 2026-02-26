@@ -1,4 +1,4 @@
-# Poco Chat
+# Case Builder
 
 A real-time chat application built with a Go REST API backend and Vue 3 frontend.
 

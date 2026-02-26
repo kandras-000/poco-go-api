@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['pwa-192.png', 'pwa-512.png'],
       manifest: {
-        name: 'Poco Chat',
-        short_name: 'Poco',
+        name: 'Case Builder',
+        short_name: 'CB',
         description: 'Secure messaging and evidence collection app',
         theme_color: '#4f46e5',
         background_color: '#f0f2f5',

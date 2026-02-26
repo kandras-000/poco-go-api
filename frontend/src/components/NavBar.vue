@@ -1,6 +1,6 @@
 <template>
   <nav class="flex items-center justify-between px-6 h-14 bg-indigo-600 text-white shrink-0">
-    <span class="text-xl font-bold tracking-wide">Poco Chat</span>
+    <span class="text-xl font-bold tracking-wide">Case Builder</span>
 
     <!-- Desktop nav -->
     <div class="hidden sm:flex items-center gap-6">

@@ -1,7 +1,7 @@
 <template>
   <div class="flex-1 flex items-center justify-center bg-gray-100">
     <div class="bg-white rounded-xl px-8 py-10 w-full max-w-md shadow-lg mx-4">
-      <h1 class="text-center text-indigo-600 text-2xl font-bold mb-1">Poco Chat</h1>
+      <h1 class="text-center text-indigo-600 text-2xl font-bold mb-1">Case Builder</h1>
       <h2 class="text-center text-lg text-gray-500 font-medium mb-7">Sign In</h2>
       <form @submit.prevent="handleLogin">
         <div class="mb-4">
