@@ -3,6 +3,7 @@
     <NavBar v-if="auth.isAuthenticated" />
     <RouterView />
     <UpdatePrompt />
+    <InstallPrompt />
   </div>
 </template>
 
@@ -10,6 +11,7 @@
 import { RouterView } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
+import InstallPrompt from './components/InstallPrompt.vue'
 import { useAuthStore } from './stores/auth'
 
 const auth = useAuthStore()
